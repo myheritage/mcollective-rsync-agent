@@ -1,3 +1,5 @@
+require 'fileutils'
+
 module MCollective
   module Agent
     class Rsync<RPC::Agent
@@ -5,6 +7,21 @@ module MCollective
         source = request.data[:source]
         destination = request.data[:destination]
         rsync_opts = request.data[:rsync_opts]
+
+        if request.data[:atomic]
+          # Atomic mode requested. Lets check if destdir is a symlink
+            if !File.symlink?(destination)
+              reply.fail! "Destination #{destination} is not a symlink!"
+            end
+            # Fix destination and add the --link-dest option to list of options
+            link_dest = destination
+            destination << "_#{Time.now}"
+            if !rsync_opts.nil?
+              rsync_opts << " --link-dest #{link_dest}"
+            else
+              rsync_opts = "--link-dest #{link_dest}"
+            end
+        end
         if !request.data[:proxy_list].nil? && !request.data[:proxy_list].empty?
           rsync_proxies = request.data[:proxy_list].split(',')
         end
@@ -35,8 +52,24 @@ module MCollective
         rescue => error
           Log.fatal("Caught exception while running rsync: %s" % [error])
         end
-        reply.fail! "Rsync failed!" unless rc == 0
+        if rc == 0
+          if request.data[:atomic]
+            # We are in atomic mode, and rsync is successful
+            # Time to swap the symlinks!
+            old_dir = File.realpath(link_dest)
+            FileUtils.ln_sf(destination,link_dest)
+            FileUtils.remove_dir(old_dir)
+          end
         reply[:status] = "Rsync completed"
+        else
+          if request.data[:atomic]
+            # We are in atomic mode, and rsync failed.
+            # Cleanup!
+            FileUtils.remove_dir(destination)
+          end
+          reply.fail! "Rsync failed!"
+        end
+
       end
     end
   end

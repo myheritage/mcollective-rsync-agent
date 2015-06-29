@@ -1,7 +1,7 @@
 class MCollective::Application::Rsync<MCollective::Application
 
       usage <<-END_OF_USAGE
-mco rsync -s|--source <SOURCE> -d|--destination <DESTINATION [-o|--rsync_opts <OPTIONS>]
+mco rsync -s|--source <SOURCE> -d|--destination <DESTINATION> [-o|--rsync_opts <OPTIONS>] [-a|--atomic]
 
 The OPTIONS can be one of the following:
   -s | --source SOURCE    - Dist the set version
@@ -37,6 +37,12 @@ END_OF_USAGE
          :type        => String,
          :required    => false
 
+  option :atomic,
+         :description => "Atomic rsync",
+         :arguments   => ["-a", "--atomic"],
+         :type        => Boolean,
+         :required    => false
+
   # Validate configuration
   def validate_configuration(configuration)
 
@@ -51,6 +57,8 @@ END_OF_USAGE
     client_options[:destination] = configuration[:destination] if configuration[:destination]
     client_options[:rsync_opts] = configuration[:rsync_opts] if configuration[:rsync_opts]
     client_options[:proxy_list] = configuration[:rsync_proxies] if configuration[:rsync_proxies]
+    client_options[:atomic] = configuration[:atomic] if configuration[:atomic]
+
 
     succeeded = Array.new()
     failures = 0

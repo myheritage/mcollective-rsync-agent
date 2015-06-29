@@ -42,6 +42,16 @@ action "rsync", :description => "Parallel RSync" do
          :maxlength   => 0,
          :optional    => true
 
+  input  :atomic,
+         :prompt      => "Atomic rsync",
+         :description => "Use atomic method",
+         :display_as  => "Atomic rsync",
+         :validation  => ".*",
+         :type        => :boolean,
+         :default     => false,
+         :maxlength   => 0,
+         :optional    => true
+
   input  :proxy_list,
          :prompt      => "Proxy list",
          :description => "The rsync will pick a random proxy server to use",
