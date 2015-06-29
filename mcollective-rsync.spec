@@ -17,7 +17,7 @@
 
 
 Name: mcollective-rsync
-Version: %{?MH_VERSION:0.0.1}
+Version: %{?MH_VERSION}
 Release: 1%{?dist}
 Summary: Parallel rsync used in MyHeritage
 
