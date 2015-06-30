@@ -58,12 +58,17 @@ module MCollective
             # We are in atomic mode, and rsync is successful
             # Time to swap the symlinks!
             Log.debug('Finished rsync, fixing links')
+            Log.info("Going to link #{destination} to #{link_dest}")
             if File.symlink?(link_dest)
               old_dir = Pathname.new(link_dest).realpath
               FileUtils.ln_sf(destination,link_dest)
+              if Pathname.new(destination).realpath != Pathname.new(link_dest).realpath
+                Log.error("#{link_dest} does not point to #{destination}")
+                FileUtils.remove_dir(destination)
+                reply.fail! "Failed to set link"
+              end
               FileUtils.remove_dir(old_dir)
             else
-              Log.info("Going to link #{destination} to #{link_dest}")
               FileUtils.ln_sf(destination,link_dest)
             end
           end
