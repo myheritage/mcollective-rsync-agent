@@ -61,7 +61,11 @@ module MCollective
             Log.info("Going to link #{destination} to #{link_dest}")
             if File.symlink?(link_dest)
               old_dir = Pathname.new(link_dest).realpath
-              FileUtils.ln_sf(destination,link_dest)
+              lnrc = run("/bin/ln -nsf #{destination} #{link_dest}", :stdout => :out, :stderr => :err)
+              if lnrc != 0
+                Log.error("ln command returned error: #{err}")
+                reply.fail! "ln command returned error: #{err}"
+              end
               if Pathname.new(destination).realpath != Pathname.new(link_dest).realpath
                 Log.error("#{link_dest} does not point to #{destination}")
                 FileUtils.remove_dir(destination)
@@ -69,7 +73,11 @@ module MCollective
               end
               FileUtils.remove_dir(old_dir)
             else
-              FileUtils.ln_sf(destination,link_dest)
+              lnrc = run("/bin/ln -nsf #{destination} #{link_dest}", :stdout => :out, :stderr => :err)
+              if lnrc != 0
+                Log.error("ln command returned error: #{err}")
+                reply.fail! "ln command returned error: #{err}"
+              end
             end
           end
         reply[:status] = "Rsync completed"
