@@ -8,14 +8,15 @@ module MCollective
         destination = request.data[:destination]
         rsync_opts = request.data[:rsync_opts]
 
+        link_dest = nil
         if request.data[:atomic]
           # Atomic mode requested. Lets check if destdir is a symlink
-            if !File.symlink?(destination)
+            if !File.symlink?(destination) && File.exists?(destination)
               reply.fail! "Destination #{destination} is not a symlink!"
             end
             # Fix destination and add the --link-dest option to list of options
-            link_dest = destination
-            destination << "_#{Time.now}"
+            link_dest = destination.dup
+            destination << "_#{Time.now.to_i}"
             if !rsync_opts.nil?
               rsync_opts << " --link-dest #{link_dest}"
             else
@@ -56,15 +57,22 @@ module MCollective
           if request.data[:atomic]
             # We are in atomic mode, and rsync is successful
             # Time to swap the symlinks!
-            old_dir = File.realpath(link_dest)
-            FileUtils.ln_sf(destination,link_dest)
-            FileUtils.remove_dir(old_dir)
+            Log.debug('Finished rsync, fixing links')
+            if File.symlink?(link_dest)
+              old_dir = Pathname.new(link_dest).realpath
+              FileUtils.ln_sf(destination,link_dest)
+              FileUtils.remove_dir(old_dir)
+            else
+              Log.info("Going to link #{destination} to #{link_dest}")
+              FileUtils.ln_sf(destination,link_dest)
+            end
           end
         reply[:status] = "Rsync completed"
         else
           if request.data[:atomic]
             # We are in atomic mode, and rsync failed.
             # Cleanup!
+            Log.debug('Rsync failed, removing target dir without touching the link')
             FileUtils.remove_dir(destination)
           end
           reply.fail! "Rsync failed!"

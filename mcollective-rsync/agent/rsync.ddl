@@ -46,10 +46,8 @@ action "rsync", :description => "Parallel RSync" do
          :prompt      => "Atomic rsync",
          :description => "Use atomic method",
          :display_as  => "Atomic rsync",
-         :validation  => ".*",
          :type        => :boolean,
          :default     => false,
-         :maxlength   => 0,
          :optional    => true
 
   input  :proxy_list,

@@ -40,7 +40,7 @@ END_OF_USAGE
   option :atomic,
          :description => "Atomic rsync",
          :arguments   => ["-a", "--atomic"],
-         :type        => Boolean,
+         :type        => :bool,
          :required    => false
 
   # Validate configuration
