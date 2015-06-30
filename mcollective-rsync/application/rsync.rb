@@ -74,5 +74,7 @@ END_OF_USAGE
       end
 
     end
+
+    halt mc.stats
   end
 end
