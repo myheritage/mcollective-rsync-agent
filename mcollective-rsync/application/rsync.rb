@@ -4,10 +4,11 @@ class MCollective::Application::Rsync<MCollective::Application
 mco rsync -s|--source <SOURCE> -d|--destination <DESTINATION> [-o|--rsync_opts <OPTIONS>] [-a|--atomic]
 
 The OPTIONS can be one of the following:
-  -s | --source SOURCE    - Dist the set version
-  -d | --destination DEST - Base url of the download
+  -s | --source SOURCE    - Source location of the rsync
+  -d | --destination DEST - destination folder of the rsync
   -o | --rsync_opts       - Rsync options
   -p | --rsync_proxies    - Proxies to pick from and use for the rsync
+  -a | --atomic           - Use atomic update
 
 END_OF_USAGE
 
