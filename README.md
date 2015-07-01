@@ -57,7 +57,7 @@ In the end, you will have on the node:
 lrwxrwxrwx  1 user     group   41 Jul  1 04:43 target -> /dir/target_1435740324
 drwxr-sr-x 14 user     group  4096 Jun 30 17:56 target_1435740324
 
-``
+```
 After the next one, you will have:
 ```
 % ll /dir
