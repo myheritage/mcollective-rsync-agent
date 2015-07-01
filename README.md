@@ -65,3 +65,5 @@ lrwxrwxrwx  1 user     group   41 Jul  1 04:43 target -> /dir/target_1435741156
 drwxr-sr-x 14 user     group  4096 Jun 30 17:56 target_1435741156
 
 ``
+# mcollective-rsync-agent
+MCollective Agent to run remote rsync
