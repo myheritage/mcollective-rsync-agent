@@ -80,13 +80,13 @@ module MCollective
               end
             end
           end
-        reply[:status] = "Rsync completed"
+          reply[:status] = "Rsync completed"
         else
           if request.data[:atomic]
             # We are in atomic mode, and rsync failed.
             # Cleanup!
             Log.debug('Rsync failed, removing target dir without touching the link')
-            FileUtils.remove_dir(destination)
+            FileUtils.remove_dir(destination) if File.exists?(destination)
           end
           reply.fail! "Rsync failed!"
         end
