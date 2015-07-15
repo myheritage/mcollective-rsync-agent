@@ -14,6 +14,9 @@ module MCollective
             if !File.symlink?(destination) && File.exists?(destination)
               reply.fail! "Destination #{destination} is not a symlink!"
             end
+            if !File.exists?("#{destination}_tmp")
+              reply.fail! "Temporary symlink location #{destination}_tmp already exists!"
+            end
             # Fix destination and add the --link-dest option to list of options
             link_dest = destination.dup
             destination << "_#{Time.now.to_i}"
@@ -73,10 +76,15 @@ module MCollective
               end
               FileUtils.remove_dir(old_dir)
             else
-              lnrc = run("/bin/ln -nsf #{destination} #{link_dest}", :stdout => :out, :stderr => :err)
+              lnrc = run("/bin/ln -nsf #{destination} #{link_dest}_tmp", :stdout => :out, :stderr => :err)
               if lnrc != 0
                 Log.error("ln command returned error: #{err}")
                 reply.fail! "ln command returned error: #{err}"
+              end
+              mvrc = run("/bin/mv -T #{link_dest}_tmp #{link_dest}", :stdout => :out, :stderr => :err)
+              if mvrc != 0
+                Log.error("mv command returned error: #{err}")
+                reply.fail! "mv command returned error: #{err}"
               end
             end
           end
@@ -87,6 +95,7 @@ module MCollective
             # Cleanup!
             Log.debug('Rsync failed, removing target dir without touching the link')
             FileUtils.remove_dir(destination) if File.exists?(destination)
+            FileUtils.remove_dir("#{link_dest}_tmp") if File.exists?("#{link_dest}_tmp")
           end
           reply.fail! "Rsync failed!"
         end
