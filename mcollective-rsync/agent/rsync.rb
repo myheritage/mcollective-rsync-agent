@@ -14,7 +14,7 @@ module MCollective
             if !File.symlink?(destination) && File.exists?(destination)
               reply.fail! "Destination #{destination} is not a symlink!"
             end
-            if !File.exists?("#{destination}_tmp")
+            if File.exists?("#{destination}_tmp")
               reply.fail! "Temporary symlink location #{destination}_tmp already exists!"
             end
             # Fix destination and add the --link-dest option to list of options
