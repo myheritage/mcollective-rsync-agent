@@ -7,7 +7,7 @@ module MCollective
         source = request.data[:source]
         destination = request.data[:destination]
         rsync_opts = request.data[:rsync_opts]
-
+        Log.info("Starting with #{request.data.inspect}")
         link_dest = nil
         if request.data[:atomic]
           # Atomic mode requested. Lets check if destdir is a symlink
@@ -45,6 +45,7 @@ module MCollective
         err = ""
         rc = 1
         begin
+          Log.info("Running rsync command: #{command}")
           rc = run(command, :stdout => out, :stderr => err)
           if rc != 0
             Log.warn(command)
@@ -61,36 +62,21 @@ module MCollective
             # We are in atomic mode, and rsync is successful
             # Time to swap the symlinks!
             Log.debug('Finished rsync, fixing links')
-            Log.info("Going to link #{destination} to #{link_dest}")
             if File.symlink?(link_dest)
               old_dir = Pathname.new(link_dest).realpath
-              lnrc = run("/bin/ln -nsf #{destination} #{link_dest}_tmp", :stdout => :out, :stderr => :err)
-              if lnrc != 0
-                Log.error("ln command returned error: #{err}")
-                reply.fail! "ln command returned error: #{err}"
-              end
-              mvrc = run("/bin/mv -T #{link_dest}_tmp #{link_dest}", :stdout => :out, :stderr => :err)
-              if mvrc != 0
-                Log.error("mv command returned error: #{err}")
-                reply.fail! "mv command returned error: #{err}"
-              end
+            end
+            begin
+              atomic_symlink_switch(destination,link_dest)
+            rescue => e
+              reply.fail! "Failure in atomic symlink switch: #{e.message}"
+            end
+            if old_dir and !old_dir.nil?
               if Pathname.new(destination).realpath != Pathname.new(link_dest).realpath
                 Log.error("#{link_dest} does not point to #{destination}")
                 FileUtils.remove_dir(destination)
                 reply.fail! "Failed to set link"
               end
               FileUtils.remove_dir(old_dir)
-            else
-              lnrc = run("/bin/ln -nsf #{destination} #{link_dest}_tmp", :stdout => :out, :stderr => :err)
-              if lnrc != 0
-                Log.error("ln command returned error: #{err}")
-                reply.fail! "ln command returned error: #{err}"
-              end
-              mvrc = run("/bin/mv -T #{link_dest}_tmp #{link_dest}", :stdout => :out, :stderr => :err)
-              if mvrc != 0
-                Log.error("mv command returned error: #{err}")
-                reply.fail! "mv command returned error: #{err}"
-              end
             end
           end
           reply[:status] = "Rsync completed"
@@ -104,7 +90,22 @@ module MCollective
           end
           reply.fail! "Rsync failed!"
         end
+        Log.info "Returning: #{reply[:status]}"
+      end
 
+      def atomic_symlink_switch(destination,link_dest)
+        Log.info("Going to link #{destination} to #{link_dest}_tmp")
+        lnrc = run("/bin/ln -nsf #{destination} #{link_dest}_tmp", :stdout => :out, :stderr => :err)
+        if lnrc != 0
+          Log.error("ln command returned error: #{err}")
+          raise "ln command returned error: #{err}"
+        end
+        Log.info("Going to mv #{link_dest}_tmp into #{link_dest}")
+        mvrc = run("/bin/mv -T #{link_dest}_tmp #{link_dest}", :stdout => :out, :stderr => :err)
+        if mvrc != 0
+          Log.error("mv command returned error: #{err}")
+          raise "mv command returned error: #{err}"
+        end
       end
     end
   end
