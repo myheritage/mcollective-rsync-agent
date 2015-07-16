@@ -76,6 +76,7 @@ module MCollective
                 FileUtils.remove_dir(destination)
                 reply.fail! "Failed to set link"
               end
+              Log.info "Deleteing previous dir #{old_dir}"
               FileUtils.remove_dir(old_dir)
             end
           end
