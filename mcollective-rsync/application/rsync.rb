@@ -70,7 +70,7 @@ END_OF_USAGE
         printf("%-40s: %s\n", simpleresponse[:sender], simpleresponse[:data][:status])
         succeeded.push(simpleresponse[:sender])
       else
-        puts "The RPC agent returned an error: #{response[:body][:statusmsg]}"
+        printf("%-40s: %s %s\n", simpleresponse[:sender], "The RPC agent returned an error:", response[:body][:statusmsg])
         failures += 1
       end
 
