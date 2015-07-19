@@ -26,7 +26,7 @@ The OPTIONS can be one of the following:
  + --rsync_proxies - Since the rsync can be heavy on the network, it allows specifying comma delimited list of proxy URLS, and each 
   node will pick 1 randomally to use for the transfer
  + --atomic - When used, the target will be changed to include an epoch time. when the rsync will be completed, the node
-  will transfer the symlink to make the whole process as a atomic as possible. --atomic will also add "---link-dest" to the options
+  will transfer the symlink to make the whole process as a atomic as possible. --atomic will also add "---link-dest" to the options, which will use hard links for identical files, thus improving both performance and space requirements.
  
 
 Example:
