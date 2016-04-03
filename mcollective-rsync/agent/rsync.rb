@@ -76,6 +76,10 @@ module MCollective
                 FileUtils.remove_dir(destination)
                 reply.fail! "Failed to set link"
               end
+              if request.data[:delete_delay] and request.data[:delete_delay] > 0
+                Log.info "Sleeping for #{request.data[:delete_delay]} seconds before removing #{old_dir}"
+                sleep request.data[:delete_delay]
+              end
               Log.info "Deleteing previous dir #{old_dir}"
               FileUtils.remove_dir(old_dir)
             end

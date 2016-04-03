@@ -50,6 +50,13 @@ action "rsync", :description => "Parallel RSync" do
          :default     => false,
          :optional    => true
 
+  input  :delete_delay,
+         :prompt      => "Delete delay (seconds)",
+         :description => "Number of seconds to delay the delete of the old directory",
+         :display_as  => "Delete delay",
+         :type        => :integer,
+         :optional    => true
+
   input  :proxy_list,
          :prompt      => "Proxy list",
          :description => "The rsync will pick a random proxy server to use",
