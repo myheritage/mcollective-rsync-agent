@@ -2,7 +2,7 @@ metadata  :name        => 'rsync',
           :description => 'Run rsync',
           :author      => 'Imri Zvik <imri.zvik@myheritage.com>',
           :version     => '0.0.1',
-          :timeout     => 3600,
+          :timeout     => 9600,
           :license     => 'Protected - MyHeritage LTD',
           :url         => "www.myheritage.com"
 
